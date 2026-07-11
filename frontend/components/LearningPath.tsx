@@ -1,189 +1,169 @@
 'use client';
 
-import type { Section, LessonNodeStatus } from '@/types';
-import SectionBanner from './SectionBanner';
-import LessonNode from './LessonNode';
+import { motion } from 'framer-motion';
+import { Lock, Check, Star, Crown } from 'lucide-react';
+import type { PathSection, Skill } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 interface LearningPathProps {
-  sections: Section[];
+  sections: PathSection[];
+  onLessonClick: (skill: Skill, lessonIndex: number) => void;
 }
 
-// Longer, more natural zig-zag pattern that alternates left and right
-// Mimics Duolingo's winding path — wider sweep, more nodes before returning
-const ZIGZAG_X: number[] = [
-  50, 62, 74, 82, 74, 62, 50, 38, 26, 18, 26, 38,
-];
+// Zigzag pattern for the path
+const xOffsets = [0, 80, 120, 80, 0, -80, -120, -80, 0, 80, 120, 80, 0, -80, -120, -80];
 
-function getZigzagX(index: number): number {
-  return ZIGZAG_X[index % ZIGZAG_X.length];
-}
-
-// Replace the coffee emoji with a more appropriate learning icon
-const ICON_OVERRIDES: Record<string, string> = {
-  '☕': '📖',
-};
-
-function mapIcon(icon: string): string {
-  return ICON_OVERRIDES[icon] ?? icon;
-}
-
-interface FlatLesson {
-  lessonId: number;
-  skillName: string;
-  skillIcon: string;
-  completed: boolean;
-}
-
-function flattenSectionLessons(section: Section): FlatLesson[] {
-  const lessons: FlatLesson[] = [];
-  for (const skill of section.skills) {
-    for (const lesson of skill.lessons) {
-      lessons.push({
-        lessonId: lesson.id,
-        skillName: skill.name,
-        skillIcon: mapIcon(skill.icon),
-        completed: lesson.completed,
-      });
-    }
-  }
-  return lessons;
-}
-
-function resolveStatuses(lessons: FlatLesson[]): LessonNodeStatus[] {
-  let foundCurrent = false;
-  return lessons.map((l) => {
-    if (l.completed) return 'completed';
-    if (!foundCurrent) {
-      foundCurrent = true;
-      return 'current';
-    }
-    return 'locked';
-  });
-}
-
-function isSectionUnlocked(sectionIndex: number, allSections: Section[]): boolean {
-  if (sectionIndex === 0) return true;
-  for (let i = 0; i < sectionIndex; i++) {
-    const lessons = flattenSectionLessons(allSections[i]);
-    if (lessons.some((l) => !l.completed)) return false;
-  }
-  return true;
-}
-
-const NODE_SIZE = 72;
-const NODE_SPACING = 100;
-const START_Y = 10;
-
-function buildPathD(nodes: { xPercent: number }[], totalHeight: number): string {
-  if (nodes.length < 2) return '';
-  const halfNode = NODE_SIZE / 2;
-
-  const points = nodes.map((n, i) => ({
-    x: n.xPercent,
-    y: ((START_Y + i * NODE_SPACING + halfNode) / totalHeight) * 100,
-  }));
-
-  let d = `M ${points[0].x} ${points[0].y}`;
-  for (let i = 1; i < points.length; i++) {
-    const prev = points[i - 1];
-    const curr = points[i];
-    const midY = (prev.y + curr.y) / 2;
-    d += ` C ${prev.x} ${midY}, ${curr.x} ${midY}, ${curr.x} ${curr.y}`;
-  }
-  return d;
-}
-
-export default function LearningPath({ sections }: LearningPathProps) {
-  let globalNodeIndex = 0;
+export function LearningPath({ sections, onLessonClick }: LearningPathProps) {
+  let globalLessonIndex = 0;
 
   return (
-    <div className="flex flex-col gap-8 pb-20">
-      {sections.map((section, sectionIndex) => {
-        const lessons = flattenSectionLessons(section);
-        const unlocked = isSectionUnlocked(sectionIndex, sections);
-        const statuses: LessonNodeStatus[] = unlocked
-          ? resolveStatuses(lessons)
-          : lessons.map((): LessonNodeStatus => 'locked');
+    <div className="relative w-full max-w-2xl mx-auto pb-32">
+      {sections.map((section, sIdx) => (
+        <div key={section.id} className="relative">
+          {/* Section banner */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: sIdx * 0.2 }}
+            className="flex items-center justify-center my-8"
+          >
+            <div className="px-6 py-3 rounded-2xl bg-duo-gold text-white font-extrabold text-lg uppercase tracking-wide shadow-lg flex items-center gap-2">
+              <Crown className="w-5 h-5" fill="white" />
+              {section.title}
+            </div>
+          </motion.div>
 
-        const nodes = lessons.map((lesson, i) => {
-          const idx = globalNodeIndex + i;
-          return { ...lesson, status: statuses[i], xPercent: getZigzagX(idx) };
-        });
-        globalNodeIndex += lessons.length;
-
-        const totalHeight = nodes.length * NODE_SPACING + 20;
-
-        return (
-          <div key={section.id} className="flex flex-col gap-5">
-            <SectionBanner title={section.title} index={sectionIndex} />
-
-            {nodes.length > 0 ? (
-              <div className="relative" style={{ height: `${totalHeight}px` }}>
-                {/* Connecting dotted path */}
-                {nodes.length > 1 && (
-                  <svg
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                    className="absolute inset-0 w-full h-full pointer-events-none"
-                  >
-                    <path
-                      d={buildPathD(nodes, totalHeight)}
-                      fill="none"
-                      stroke="#d1d5db"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeDasharray="5 4"
-                    />
-                  </svg>
-                )}
-
-                {/* Lesson nodes */}
-                {nodes.map((node, i) => (
-                  <div
-                    key={node.lessonId}
-                    className="absolute"
-                    style={{
-                      left: `calc(${node.xPercent}% - ${NODE_SIZE / 2}px)`,
-                      top: `${START_Y + i * NODE_SPACING}px`,
-                      zIndex: 10,
-                    }}
-                  >
-                    <LessonNode
-                      lessonId={node.lessonId}
-                      skillName={node.skillName}
-                      skillIcon={node.skillIcon}
-                      status={node.status}
-                      animationDelay={sectionIndex * 80 + i * 50}
-                    />
+          {/* Skills and lessons */}
+          {section.skills.map((skill) => {
+            const lessons = skill.lessons;
+            return (
+              <div key={skill.id} className="relative">
+                {lessons.length === 0 ? (
+                  <div className="flex justify-center py-6">
+                    <LockedNode skill={skill} />
                   </div>
-                ))}
+                ) : (
+                  <div className="space-y-4">
+                    {lessons.map((lesson, lIdx) => {
+                      const xOffset = xOffsets[globalLessonIndex % xOffsets.length];
+                      const firstIncomplete = lessons.findIndex((l) => !l.completed);
+
+const isCompleted = lesson.completed;
+const isCurrent =
+  firstIncomplete !== -1 && lIdx === firstIncomplete;
+
+const isLocked =
+  firstIncomplete !== -1 && lIdx > firstIncomplete;
+                      globalLessonIndex++;
+
+                      return (
+                        <div
+                          key={lesson.id}
+                          className="flex justify-center"
+                          style={{ transform: `translateX(${xOffset}px)` }}
+                        >
+                          <LessonNode
+                            skill={skill}
+                            lessonIndex={lIdx}
+                            isCompleted={isCompleted}
+                            isCurrent={isCurrent}
+                            isLocked={isLocked}
+                            icon={skill.icon}
+                            onClick={() => !isLocked && onLessonClick(
+  {
+    ...skill,
+    lessons: [{ id: 1, completed: false }]
+  },
+  0
+)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            ) : (
-              <LockedSectionPlaceholder />
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
 
-function LockedSectionPlaceholder() {
+function LessonNode({
+  skill,
+  lessonIndex,
+  isCompleted,
+  isCurrent,
+  isLocked,
+  icon,
+  onClick,
+}: {
+  skill: Skill;
+  lessonIndex: number;
+  isCompleted: boolean;
+  isCurrent: boolean;
+  isLocked: boolean;
+  icon: string;
+  onClick: () => void;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center py-10 gap-4 opacity-40 select-none">
-      <div className="flex gap-5">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="w-16 h-16 rounded-full bg-duo-gray-light border-b-4 border-duo-gray flex items-center justify-center text-2xl"
-          >
-            🔒
-          </div>
-        ))}
+    <div className="relative flex flex-col items-center">
+      {/* Connecting line */}
+      {lessonIndex > 0 && (
+        <div className="absolute -top-4 w-1 h-4 bg-gray-300 rounded-full" />
+      )}
+
+      {/* Tooltip */}
+      <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-white rounded-xl border-2 border-gray-200 shadow-md text-xs font-bold text-duo-text whitespace-nowrap z-10">
+        {skill.name}
+        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-r-2 border-b-2 border-gray-200 rotate-45" />
       </div>
-      <p className="text-duo-gray font-bold text-sm text-center">
-        Complete the previous section to unlock
-      </p>
+
+      <motion.button
+        whileHover={!isLocked ? { scale: 1.1 } : {}}
+        whileTap={!isLocked ? { scale: 0.95 } : {}}
+        onClick={onClick}
+        className={cn(
+          'relative w-20 h-20 rounded-full flex items-center justify-center text-3xl border-b-[6px] transition-all',
+          isCompleted && 'bg-duo-green border-green-700',
+          isCurrent && 'bg-duo-blue border-blue-700',
+          isLocked && 'bg-gray-200 border-gray-300 cursor-not-allowed',
+          !isCompleted && !isCurrent && !isLocked && 'bg-white border-gray-200'
+        )}
+        style={isCurrent ? { animation: 'pulse-glow 2s infinite' } : {}}
+      >
+        {isLocked ? (
+          <Lock className="w-8 h-8 text-gray-400" />
+        ) : isCompleted ? (
+          <Check className="w-8 h-8 text-white" strokeWidth={4} />
+        ) : (
+          <span className="text-3xl">{icon}</span>
+        )}
+
+        {isCurrent && (
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+            className="absolute -top-10 left-1/2 -translate-x-1/2"
+          >
+            <Star className="w-6 h-6 text-duo-gold" fill="currentColor" />
+          </motion.div>
+        )}
+      </motion.button>
+    </div>
+  );
+}
+
+function LockedNode({ skill }: { skill: Skill }) {
+  return (
+    <div className="relative w-20 h-20 rounded-full bg-gray-200 border-b-[6px] border-gray-300 flex items-center justify-center cursor-not-allowed">
+      <Lock className="w-8 h-8 text-gray-400" />
+      <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-white rounded-xl border-2 border-gray-200 shadow-md text-xs font-bold text-duo-text whitespace-nowrap z-10">
+        {skill.name}
+        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-r-2 border-b-2 border-gray-200 rotate-45" />
+      </div>
     </div>
   );
 }

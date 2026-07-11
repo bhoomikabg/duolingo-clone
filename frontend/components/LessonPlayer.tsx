@@ -51,9 +51,7 @@ export function LessonPlayer({ lessonId, skillName, skillIcon, user, onUserUpdat
   }, [lessonId]);
 
   const currentExercise = exercises[currentIndex];
-  console.log("Exercises:", exercises.length);
-  console.log("Current index:", currentIndex);
-  console.log("Current exercise:", currentExercise);
+
   const isCorrect = useCallback((): boolean => {
     if (!currentExercise) return false;
     if (currentExercise.type === 'TRANSLATE') {
@@ -116,7 +114,7 @@ export function LessonPlayer({ lessonId, skillName, skillIcon, user, onUserUpdat
       setTypedAnswer('');
     } else {
       // Lesson complete
-      api.completeLesson(lessonId, xpEarned, hearts)
+      api.completeLesson(lessonId, correctCount*10, hearts)
         .then((res) => {
           onUserUpdate({
             ...user,
@@ -139,7 +137,7 @@ export function LessonPlayer({ lessonId, skillName, skillIcon, user, onUserUpdat
 
   if (!currentExercise) return null;
 
-  const progress = ((currentIndex) / exercises.length) * 100;
+  const progress = ((currentIndex+1) / exercises.length) * 100;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

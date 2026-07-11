@@ -174,7 +174,7 @@ export default function Home() {
           </motion.div>
 
           {/* Path */}
-          {/*<LearningPath sections={path} onLessonClick={handleLessonClick} /> */}
+          <LearningPath sections={path} onLessonClick={handleLessonClick} />
         </main>
       </div>
     </div>

@@ -18,8 +18,8 @@ export interface Skill {
   id: number;
   name: string;
   icon: string;
-  completed: boolean;
-  locked: boolean;
+  completed?: boolean;
+  locked?: boolean;
   lessons: Lesson[];
 }
 
