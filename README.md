@@ -3,6 +3,14 @@
 A full-stack Duolingo-inspired language learning application built using FastAPI and Next.js.
 
 ---
+## Live Demo
+
+**Frontend (Vercel):**
+https://duolingo-clone-alpha-sandy.vercel.app
+
+**Backend API (Render):**
+https://duolingo-clone-l6kd.onrender.com
+
 
 ## Tech Stack
 
