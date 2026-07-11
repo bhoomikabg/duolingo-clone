@@ -1,4 +1,4 @@
-export const API_BASE_URL = 'http://127.0.0.1:8000';
+export const API_BASE_URL = "https://duolingo-clone-l6kd.onrender.com";
 
 export interface User {
   id: number;
