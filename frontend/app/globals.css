@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  --font-nunito: 'Nunito', sans-serif;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 15%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 15%;
+  --primary: 130 97% 40%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 15%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 130 97% 40%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 130 97% 40%;
+  --radius: 0.75rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+}
+
+@layer base {
+  * {
+    @apply border-border box-border;
+  }
+  body {
+    @apply bg-[#f7f7f7] text-duo-dark font-sans antialiased;
+    font-family: 'Nunito', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+  }
+}
+
+@layer components {
+  .duo-btn {
+    @apply inline-flex items-center justify-center rounded-2xl font-bold text-sm uppercase tracking-wider transition-all duration-150 active:translate-y-[2px] select-none cursor-pointer;
+  }
+  .duo-btn-primary {
+    @apply duo-btn bg-duo-green text-white border-b-4 border-duo-green-dark px-6 py-3 hover:bg-duo-green-light hover:border-duo-green active:border-b-0 active:mt-[4px];
+  }
+  .duo-btn-secondary {
+    @apply duo-btn bg-white text-duo-dark border-2 border-duo-border-gray border-b-4 px-6 py-3 hover:bg-duo-gray-bg active:border-b-2 active:mt-[2px];
+  }
+  .stat-badge {
+    @apply flex items-center gap-1.5 font-extrabold text-sm;
+  }
+}
+
+/* Lesson node path connecting line */
+.path-connector {
+  position: absolute;
+  width: 4px;
+  background: #e5e5e5;
+  border-radius: 9999px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e5e5;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #afafaf;
+}
