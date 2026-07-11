@@ -1,84 +1,42 @@
 'use client';
 
-import type { User } from '@/types';
-import { Flame, Heart, Gem, Star, Zap } from 'lucide-react';
+import { Flame, Heart, Star, Gem, Crown } from 'lucide-react';
+import { motion } from 'framer-motion';
+import type { User } from '@/lib/api';
 
 interface TopBarProps {
   user: User;
 }
 
-export default function TopBar({ user }: TopBarProps) {
+export function TopBar({ user }: TopBarProps) {
+  const stats = [
+    { icon: Flame, value: user.streak, color: 'text-orange-500', bg: 'bg-orange-50' },
+    { icon: Gem, value: user.gems, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { icon: Heart, value: user.hearts, color: 'text-red-500', bg: 'bg-red-50' },
+    { icon: Star, value: user.xp, color: 'text-amber-500', bg: 'bg-amber-50' },
+  ];
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-duo-border-gray shadow-sm">
-      <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-duo-green flex items-center justify-center shadow-sm">
-            <span className="text-white text-lg">🦉</span>
-          </div>
-          <span className="font-extrabold text-duo-green text-lg tracking-tight hidden sm:block">
-            DuoLearn
-          </span>
-        </div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-1 sm:gap-4">
-          <StatBadge
-            icon={<Flame className="w-5 h-5 text-orange-500 fill-orange-500" />}
-            value={user.streak}
-            color="text-orange-500"
-            label="Streak"
-          />
-          <div className="w-px h-6 bg-duo-border-gray hidden sm:block" />
-          <StatBadge
-            icon={<Heart className="w-5 h-5 text-duo-red fill-duo-red" />}
-            value={user.hearts}
-            color="text-duo-red"
-            label="Hearts"
-          />
-          <div className="w-px h-6 bg-duo-border-gray hidden sm:block" />
-          <StatBadge
-            icon={<Gem className="w-5 h-5 text-duo-blue fill-duo-blue" />}
-            value={user.gems}
-            color="text-duo-blue"
-            label="Gems"
-          />
-          <div className="w-px h-6 bg-duo-border-gray hidden sm:block" />
-          <StatBadge
-            icon={<Star className="w-5 h-5 text-duo-yellow fill-duo-yellow" />}
-            value={user.xp}
-            color="text-yellow-500"
-            label="XP"
-          />
-        </div>
-
-        {/* User avatar */}
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-duo-blue to-duo-purple flex items-center justify-center text-white font-extrabold text-sm shadow-sm">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-          <span className="font-bold text-sm text-duo-dark hidden md:block">{user.name}</span>
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function StatBadge({
-  icon,
-  value,
-  color,
-  label,
-}: {
-  icon: React.ReactNode;
-  value: number;
-  color: string;
-  label: string;
-}) {
-  return (
-    <div className="flex items-center gap-1 group" title={label}>
-      {icon}
-      <span className={`font-extrabold text-sm ${color}`}>{value}</span>
+    <div className="flex items-center gap-2 sm:gap-4">
+      {stats.map((stat, i) => {
+        const Icon = stat.icon;
+        return (
+          <motion.div
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            className="flex items-center gap-1.5 font-bold text-duo-text"
+          >
+            <Icon className={`w-6 h-6 ${stat.color}`} fill="currentColor" />
+            <span className="text-sm sm:text-base">{stat.value}</span>
+          </motion.div>
+        );
+      })}
+      <motion.div
+        whileHover={{ scale: 1.1 }}
+        className="ml-2 w-10 h-10 rounded-full bg-duo-blue flex items-center justify-center text-white font-extrabold text-lg border-2 border-blue-300"
+      >
+        {user.name.charAt(0).toUpperCase()}
+      </motion.div>
     </div>
   );
 }

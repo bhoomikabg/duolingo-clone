@@ -101,7 +101,7 @@ def seed_database():
             ),
 
             Exercise(
-                lesson_id=2,
+                lesson_id=1,
                 type="TRANSLATE",
                 question="Translate: 'Un niño'",
                 correct_answer="A boy",
@@ -115,7 +115,7 @@ def seed_database():
             ),
 
             Exercise(
-                lesson_id=3,
+                lesson_id=1,
                 type="FILL_IN_BLANK",
                 question="El hombre y la ______ (woman)",
                 correct_answer="mujer",
@@ -127,7 +127,7 @@ def seed_database():
             ),
 
             Exercise(
-                lesson_id=4,
+                lesson_id=1,
                 type="MULTIPLE_CHOICE",
                 question='Choose the Spanish word for "Apple"',
                 correct_answer="Manzana",
@@ -140,7 +140,7 @@ def seed_database():
             ),
 
             Exercise(
-                lesson_id=5,
+                lesson_id=1,
                 type="TRANSLATE",
                 question="Translate: 'Buenos días'",
                 correct_answer="Good morning",
